@@ -1,0 +1,74 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Tue Mar 20 12:10:25 IST 2018
+  Author:  Administrator
+  Type: BPEL 2.0 Process
+  Purpose: One Way BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="FileBPELProcess"
+               targetNamespace="http://xmlns.oracle.com/MyFirstSOAApplication/FileAdapterProject/FileBPELProcess"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/MyFirstSOAApplication/FileAdapterProject/FileBPELProcess"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/file/MyFirstSOAApplication/FileAdapterProject/fileReadService"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/file/MyFirstSOAApplication/FileAdapterProject/fileWriteReference"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/opaque/">
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <import namespace="http://xmlns.oracle.com/pcbpel/adapter/file/MyFirstSOAApplication/FileAdapterProject/fileReadService"
+          location="../WSDLs/fileReadService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" ui:processWSDL="true"/>
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="fileReadService" partnerLinkType="ns1:Read_plt" myRole="Read_role"/>
+    <partnerLink name="fileWriteReference" partnerLinkType="ns2:Write_plt" partnerRole="Write_role"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="writeFile_Write_InputVariable" messageType="ns2:Write_msg"/>
+    <variable name="fileInput" messageType="ns1:Read_msg"/>
+  </variables>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in FileBPELProcess.wsdl) -->
+    <receive name="receiveInput" partnerLink="fileReadService" portType="ns1:Read_ptt" operation="Read"
+             variable="fileInput" createInstance="yes"/>
+    <assign name="Assign1">
+      <copy>
+        <from>$fileInput.opaque</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$writeFile_Write_InputVariable.opaque</to>
+      </copy>
+    </assign>
+    <invoke name="writeFile" partnerLink="fileWriteReference" portType="ns2:Write_ptt"
+            operation="Write" inputVariable="writeFile_Write_InputVariable" bpelx:invokeAsDetail="no"/>
+  </sequence>
+</process>

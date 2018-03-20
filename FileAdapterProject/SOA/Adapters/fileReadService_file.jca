@@ -1,0 +1,17 @@
+<adapter-config name="fileReadService" adapter="file" wsdlLocation="../WSDLs/fileReadService.wsdl" xmlns="http://platform.integration.oracle/blocks/adapter/fw/metadata">
+  
+  <connection-factory UIincludeWildcard="abc*.txt" location="eis/FileAdapter"/>
+  <endpoint-activation portType="Read_ptt" operation="Read">
+    <activation-spec className="oracle.tip.adapter.file.inbound.FileActivationSpec">
+      <property name="PhysicalDirectory" value="C:\JDeveloper\mywork\FileRead"/>
+      <property name="PhysicalArchiveDirectory" value="C:\JDeveloper\mywork\FileArchive"/>
+      <property name="UseHeaders" value="false"/>
+      <property name="MinimumAge" value="0"/>
+      <property name="Recursive" value="true"/>
+      <property name="PollingFrequency" value="1"/>
+      <property name="DeleteFile" value="true"/>
+      <property name="IncludeFiles" value="abc.*\.txt"/>
+    </activation-spec>
+  </endpoint-activation>
+
+</adapter-config>
