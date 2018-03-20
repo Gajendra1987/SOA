@@ -1,0 +1,52 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer
+
+  Created: Tue Mar 20 14:32:19 IST 2018
+  Author:  Administrator
+  Type: BPEL 2.0 Process
+  Purpose: Empty BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="BPELProcess1"
+               targetNamespace="http://xmlns.oracle.com/MyFirstSOAApplication/RestfulProject/BPELProcess1"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/MyFirstSOAApplication/RestfulProject/BPELProcess1"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+               xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/MyFirstSOAApplication/RestfulProject/RestService"
+         xmlns:ui="http://xmlns.oracle.com/soa/designer"
+         xmlns:ns2="http://TargetNamespace.com/RestService_SampleOperation_response"
+         xmlns:ns3="http://TargetNamespace.com/RestService_SampleOperation_request">
+
+  <!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC
+     Set of activities coordinating the flow of messages across the
+     services integrated within this business process
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <import namespace="http://xmlns.oracle.com/MyFirstSOAApplication/RestfulProject/RestService"
+          location="../WSDLs/RestService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" ui:processWSDL="true"/>
+  <partnerLinks>
+    <partnerLink name="RestService" partnerLinkType="ns1:RestService" myRole="RestServiceProvider"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive1_SampleOperation_InputVariable" messageType="ns1:SampleOperation_inputMessage"/>
+    <variable name="Reply1_SampleOperation_OutputVariable" messageType="ns1:SampleOperation_outputMessage"/>
+  </variables>
+  <sequence name="main">
+    <receive name="Receive1" partnerLink="RestService" portType="ns1:RestService_ptt" operation="SampleOperation"
+             variable="Receive1_SampleOperation_InputVariable" createInstance="yes"/>
+    <assign name="Assign1">
+      <copy>
+        <from>$Receive1_SampleOperation_InputVariable.request/ns3:name</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Reply1_SampleOperation_OutputVariable.reply/ns2:output</to>
+      </copy>
+    </assign>
+    <reply name="Reply1" partnerLink="RestService" variable="Reply1_SampleOperation_OutputVariable"
+           portType="ns1:RestService_ptt" operation="SampleOperation"/>
+  </sequence>
+</process>
