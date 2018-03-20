@@ -1,0 +1,32 @@
+<?xml version= '1.0' encoding= 'UTF-8' ?>
+<wsdl:definitions
+     name="BPELProcess"
+     targetNamespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:client="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    >
+    <plnk:partnerLinkType name="BPELProcess">
+        <plnk:role name="BPELProcessProvider" portType="client:BPELProcess"/>
+    </plnk:partnerLinkType>
+    <wsdl:types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:client="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+            <import namespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+                 schemaLocation="../Schemas/BPELProcess.xsd"/>
+        </schema>
+    </wsdl:types>
+    <wsdl:message name="BPELProcessRequestMessage">
+        <wsdl:part name="payload" element="client:process"/>
+    </wsdl:message>
+    <wsdl:message name="BPELProcessResponseMessage">
+        <wsdl:part name="payload" element="client:processResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="BPELProcess">
+        <wsdl:operation name="process">
+            <wsdl:input message="client:BPELProcessRequestMessage"/>
+            <wsdl:output message="client:BPELProcessResponseMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+</wsdl:definitions>

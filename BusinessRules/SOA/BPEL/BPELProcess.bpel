@@ -1,0 +1,115 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Tue Mar 20 17:12:26 IST 2018
+  Author:  Administrator
+  Type: BPEL 2.0 Process
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="BPELProcess"
+               targetNamespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/OracleRules/OracleRules_DecisionService_1"
+         xmlns:ns2="http://xmlns.oracle.com/bpel">
+  <import namespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess"
+          location="../Schemas/BPELProcess.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+  <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess" location="../WSDLs/BPELProcess.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="bpelprocess_client" partnerLinkType="client:BPELProcess" myRole="BPELProcessProvider"/>
+    <partnerLink name="OracleRules.OracleRules_DecisionService_1" partnerRole="IDecisionService_Role"
+                 partnerLinkType="ns1:IDecisionService_PLT"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:BPELProcessRequestMessage"/>
+
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable" messageType="client:BPELProcessResponseMessage"/>
+    <variable name="rulesInput" element="client:process"/>
+    <variable name="rulesOutput" element="client:processResponse"/>
+  </variables>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in BPELProcess.wsdl) -->
+    <receive name="receiveInput" partnerLink="bpelprocess_client" portType="client:BPELProcess" operation="process" variable="inputVariable" createInstance="yes"/>
+    <assign name="Assign1">
+      <copy>
+        <from>$inputVariable.payload/client:input</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$rulesInput/client:input</to>
+      </copy>
+    </assign>
+    <scope name="Rule1">
+      <bpelx:annotation>
+        <bpelx:pattern patternName="bpelx:decide"></bpelx:pattern>
+      </bpelx:annotation>
+      <variables>
+        <variable name="dsIn" messageType="ns1:callFunctionStatelessMessage"/>
+        <variable name="dsOut" messageType="ns1:callFunctionStatelessDecisionMessage"/>
+      </variables>
+      <sequence name="Sequence1">
+        <assign name="Facts_To_Rule_Service">
+          <copy>
+            <from variable="rulesInput"/>
+            <to variable="dsIn" part="payload"><query>ns1:parameterList/client:process</query></to>
+          </copy>
+        </assign>
+        <assign name="BPEL_Header">
+          <copy>
+            <from>"OracleRules_DecisionService_1"</from>
+            <to variable="dsIn" part="payload"><query>@name</query></to>
+          </copy>
+        </assign>
+        <invoke name="Invoke" partnerLink="OracleRules.OracleRules_DecisionService_1" portType="ns1:IDecisionService"
+                operation="callFunctionStateless" inputVariable="dsIn" outputVariable="dsOut"/>
+        <assign name="Rule_Service_To_Facts">
+          <copy>
+            <from variable="dsOut" part="payload"><query>ns1:resultList/client:processResponse</query></from>
+            <to variable="rulesOutput"/>
+          </copy>
+        </assign>
+      </sequence>
+    </scope>
+    <assign name="Assign2">
+      <copy>
+        <from>$rulesOutput/client:result</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:result</to>
+      </copy>
+    </assign>
+    <!-- Generate reply to synchronous request -->
+    <reply name="replyOutput" partnerLink="bpelprocess_client" portType="client:BPELProcess" operation="process" variable="outputVariable"/>
+  </sequence>
+</process>

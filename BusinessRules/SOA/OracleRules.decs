@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<decisionServices xmlns="http://xmlns.oracle.com/bpel/rules" name="OracleRules">
+    <ruleEngineProvider provider="Oracle_11.0.0.0.0" name="OracleRulesSDK">
+        <repository type="SCA-Archive">
+            <path>BusinessRules/oracle/rules/businessrules/OracleRules.rules</path>
+        </repository>
+    </ruleEngineProvider>
+    <decisionService name="OracleRules_DecisionService_1" ruleEngineProviderReference="OracleRulesSDK" targetNamespace="http://xmlns.oracle.com/OracleRules/OracleRules_DecisionService_1">
+        <catalog>OracleRules</catalog>
+        <pattern name="CallFunctionStateless">
+            <arguments>
+                <call>businessrules.OracleRules.DecisionService_1</call>
+            </arguments>
+        </pattern>
+        <pattern name="CallFunctionStateful">
+            <arguments>
+                <call>businessrules.OracleRules.DecisionService_1</call>
+            </arguments>
+        </pattern>
+    </decisionService>
+    <schemaInformation>
+        <dictionary fqnPackage="businessrules" fqnName="OracleRules" updateNumber="28">
+            <schemaBrowser>
+                <package>com.oracle.xmlns.myfirstsoaapplication.businessrules.bpelprocess</package>
+                <namespace>http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess</namespace>
+            </schemaBrowser>
+            <schemaImport namespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess" localPart="BPELProcess.xsd" schemaLocation="Schemas/BPELProcess.xsd">
+                <import namespace="http://xmlns.oracle.com/MyFirstSOAApplication/BusinessRules/BPELProcess" localPart="BPELProcess.xsd" schemaLocation="Schemas/BPELProcess.xsd"/>
+            </schemaImport>
+        </dictionary>
+    </schemaInformation>
+</decisionServices>
